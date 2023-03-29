@@ -98,7 +98,7 @@ void loop() {
     }
     */
 
-    CAN.MCP_CAN::sendMsgBuf(id,0,8,stmp);
+    CAN.sendMsgBuf(id,0,8,stmp);
                            // send data per 100ms
     }
     // send data:  id = 0x00, standrad frame, data len = 8, stmp: data buf
