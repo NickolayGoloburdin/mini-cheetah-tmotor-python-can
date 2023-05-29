@@ -37,7 +37,7 @@ mcp2515_can CAN(SPI_CS_PIN); // Set CS pin
 #endif
 
 void setup() {
-    SERIAL_PORT_MONITOR.begin(115200);
+    //SERIAL_PORT_MONITOR.begin(115200);
     Serial1.begin(115200);
     
     while(!Serial1){};
@@ -46,7 +46,7 @@ void setup() {
         //SERIAL_PORT_MONITOR.println("CAN init fail, retry...");
         delay(100);
     }
-    SERIAL_PORT_MONITOR.println("CAN init ok!");
+    //SERIAL_PORT_MONITOR.println("CAN init ok!");
 }
 
 uint8_t stmp[8] = {0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFC};
@@ -66,7 +66,7 @@ void loop() {
       for (int i = 0; i< lenght;i++){
         uint8_t data = Serial1.read();
         if (data == 0xAC){
-          SERIAL_PORT_MONITOR.println("found");
+          //SERIAL_PORT_MONITOR.println("found");
           uint8_t a = Serial1.read();
           uint8_t b = Serial1.read();
           uint8_t c = Serial1.read();
@@ -111,11 +111,11 @@ void loop() {
     // read data, len: data length, buf: data buf
     CAN.readMsgBufID(&id,&len, cdata);
     //delay(50);
-    SERIAL_PORT_MONITOR.println(len);
+    //SERIAL_PORT_MONITOR.println(len);
     //Serial1.write(id);
     for (int i = 0; i<len;i++){
       Serial1.write(cdata[i]);
-      SERIAL_PORT_MONITOR.println(cdata[i]);
+      //SERIAL_PORT_MONITOR.println(cdata[i]);
     }
     
 }
