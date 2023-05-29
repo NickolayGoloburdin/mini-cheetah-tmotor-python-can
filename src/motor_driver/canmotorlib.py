@@ -217,7 +217,7 @@ class CanMotorController():
         # create a raw socket and bind it to the given CAN interface
         if not CanMotorController.can_socket_declared:
             try:
-                CanMotorController.motor_socket = serial.Serial(port=connectport,baudrate=115200,parity='N',stopbits=serial.STOPBITS_ONE,bytesize=8)
+                CanMotorController.motor_socket = serial.Serial(port=connectport,baudrate=1000000,parity='N',stopbits=serial.STOPBITS_ONE,bytesize=8, timeout=5.0)
                 # CanMotorController.motor_socket.bind(can_socket)
                 # CanMotorController.motor_socket.settimeout(socket_timeout)
                 # print("Bound to: ", can_socket)
@@ -260,7 +260,7 @@ class CanMotorController():
             # The motor sends back only 6 bytes.
             frame = CanMotorController.motor_socket.read(6)
             data  = struct.unpack(can_frame_fmt_recv, frame)
-            print(data)
+            # print(data)
             return 0, 0, data[0]
         except Exception as e:
             print("Unable to Receive CAN Frame.")
