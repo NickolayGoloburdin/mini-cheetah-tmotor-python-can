@@ -1,7 +1,7 @@
-import time
-import numpy as np
+import motorcortex
 from src.motor_driver.canmotorlib import CanMotorController
-import matplotlib.pyplot as plt
+import numpy as np
+import time
 
 def setZeroPosition(motor):
     pos, _, _ = motor.set_zero_position()
@@ -60,47 +60,47 @@ def moveTo(start, end, vel, motor_controller: CanMotorController, torque_min=Non
                                                         c_curr))
     return c_pos
 
-motor_id = 0x01
-motor_controller = CanMotorController('/dev/ttyACM0', motor_id)
+def can_drive():
+    motor_id = 0x01
+    motor_controller = CanMotorController('/dev/ttyUSB0', motor_id)
 
-startTime = time.perf_counter()
+    # startTime = time.perf_counter()
 
-while True:
+    pos, vel, curr = motor_controller.enable_motor()
+
+    # pos, vel, curr = motor_controller.send_deg_command(0, 0, 0, 0, 0)
+    print("Initial Position: {}, Velocity: {}, Torque: {}".format(np.rad2deg(pos), np.rad2deg(vel),
+                                                                    curr))
+
+    # endTime = time.perf_counter()
+    # print("Time for One Command: {}".format(endTime - startTime))
+    time.sleep(1)
+
+    # setZeroPosition(motor_controller)
+
+
+    c_pos = np.rad2deg(pos)
+    c_pos = moveTo(c_pos, 25, 6, motor_controller, torque_min=-2, torque_max=2.0)
+
+    # for i in range(100):
+    #     time.sleep(1)
+    #     c_pos = moveTo(c_pos, 70, 25, motor_controller)
+    #     time.sleep(1)
+    #     c_pos = moveTo(c_pos, 25, 25, motor_controller)
+
+    # pos, vel, curr = motor_controller.disable_motor()
+    # print("Final Position: {}, Velocity: {}, Torque: {}".format(np.rad2deg(pos), np.rad2deg(vel), curr))
+
+if __name__=="__main__":
+    parameter_tree = motorcortex.ParameterTree()
+    motorcortex_types = motorcortex.MessageTypes()
+
     try:
-        pos, vel, curr = motor_controller.enable_motor()
-        break
-    except:
-        print("Motor not connected")
+        req, sub = motorcortex.connect('wss://192.168.1.4:5568:5567', motorcortex_types, parameter_tree,
+                                        timeout_ms=1000, certificate="mcx.cert.pem",
+                                        login="admin", password="vectioneer")
 
-# pos, vel, curr = motor_controller.send_deg_command(0, 0, 0, 0, 0)
-print("Initial Position: {}, Velocity: {}, Torque: {}".format(np.rad2deg(pos), np.rad2deg(vel),
-                                                                curr))
-
-endTime = time.perf_counter()
-print("Time for One Command: {}".format(endTime - startTime))
-time.sleep(1)
-
-# setZeroPosition(motor_controller)
-
-
-c_pos = np.rad2deg(pos)
-c_pos = moveTo(c_pos, 0, 6, motor_controller, torque_min=-2, torque_max=2.0)
-
-time.sleep(10)
-
-c_pos = moveTo(c_pos, 50, 6, motor_controller, torque_min=-2, torque_max=2.0)
-
-# while (curr < 2 and curr > -2):
-#     time.sleep(0.2)
-#     c_pos, c_vel, curr = motor_controller.send_deg_command(0, 20, 0, 2, 0)
-#     print("Position: {}, Velocity: {}, Torque: {}".format(np.rad2deg(c_pos), np.rad2deg(c_vel),
-#                                                                     curr))
-
-# for i in range(100):
-#     time.sleep(1)
-#     c_pos = moveTo(c_pos, 70, 25, motor_controller)
-#     time.sleep(1)
-#     c_pos = moveTo(c_pos, 25, 25, motor_controller)
-
-pos, vel, curr = motor_controller.disable_motor()
-print("Final Position: {}, Velocity: {}, Torque: {}".format(np.rad2deg(pos), np.rad2deg(vel), curr))
+        print("Request connection is etablished")
+    except Exception as e:
+        print(f"Failed to establish connection: {e}")
+        exit()

@@ -37,16 +37,15 @@ mcp2515_can CAN(SPI_CS_PIN); // Set CS pin
 #endif
 
 void setup() {
-    SERIAL_PORT_MONITOR.begin(115200);
-    Serial1.begin(115200);
+//    SERIAL_PORT_MONITOR.begin(115200);
+    Serial.begin(1000000);
     
-    while(!Serial1){};
+    while(!Serial){};
 
     while (CAN_OK != CAN.begin(CAN_1000KBPS)) {             // init can bus : baudrate = 500k
-        //SERIAL_PORT_MONITOR.println("CAN init fail, retry...");
-        delay(100);
+//        SERIAL_PORT_MONITOR.println("CAN init fail, retry...");
+        delay(10);
     }
-    SERIAL_PORT_MONITOR.println("CAN init ok!");
 }
 
 uint8_t stmp[8] = {0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFC};
@@ -55,31 +54,29 @@ uint32_t id;
 uint8_t  type; // bit0: ext, bit1: rtr
 uint8_t  len;
 void loop() {
-  char prbuf[32 + MAX_DATA_SIZE * 3];
+    char prbuf[32 + MAX_DATA_SIZE * 3];
     int i, n;
-    delay(100);
-     
-    int lenght = Serial1.available();
-    
+    delay(10);
+    int lenght = Serial.available();
+
     if (lenght > 0) {
-      
       for (int i = 0; i< lenght;i++){
-        uint8_t data = Serial1.read();
+        uint8_t data = Serial.read();
         if (data == 0xAC){
-          SERIAL_PORT_MONITOR.println("found");
-          uint8_t a = Serial1.read();
-          uint8_t b = Serial1.read();
-          uint8_t c = Serial1.read();
-          uint8_t d = Serial1.read();
+//          SERIAL_PORT_MONITOR.println("found");
+          uint8_t a = Serial.read();
+          uint8_t b = Serial.read();
+          uint8_t c = Serial.read();
+          uint8_t d = Serial.read();
           
           id  = a | (uint32_t(b) << 8) | (uint32_t(c) << 16) | (uint32_t(d) << 24);
           
-          uint8_t msglen = Serial1.read();
+          uint8_t msglen = Serial.read();
           for (int i = 0; i < 3;i++){
-            Serial1.read();}
+            Serial.read();}
           //SERIAL_PORT_MONITOR.println(msglen);
           for (uint8_t e = 0; e<msglen;e++){
-            stmp[e]=Serial1.read();
+            stmp[e]=Serial.read();
             //SERIAL_PORT_MONITOR.println(stmp[e]);
           }
         break;}
@@ -97,25 +94,22 @@ void loop() {
         }
     }
     */
-
     CAN.sendMsgBuf(id,0,8,stmp);
                            // send data per 100ms
     }
     // send data:  id = 0x00, standrad frame, data len = 8, stmp: data buf
-    
+    delay(10);
     if (CAN_MSGAVAIL != CAN.checkReceive()) {
-      //SERIAL_PORT_MONITOR.println("No info");
         return;
     }
 
     // read data, len: data length, buf: data buf
     CAN.readMsgBufID(&id,&len, cdata);
     //delay(50);
-    SERIAL_PORT_MONITOR.println(len);
-    //Serial1.write(id);
+//    SERIAL_PORT_MONITOR.println(len);
     for (int i = 0; i<len;i++){
-      Serial1.write(cdata[i]);
-      SERIAL_PORT_MONITOR.println(cdata[i]);
+      Serial.write(cdata[i]);
+//      SERIAL_PORT_MONITOR.println(cdata[i]);
     }
     
 }
